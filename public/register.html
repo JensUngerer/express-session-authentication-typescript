@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <!-- https://www.npmjs.com/package/crypto-js -->
+    <script src="./node_modules/crypto-js/crypto-js.js"></script>
+    <script src="./post.js"></script>
+    <script src="./register.js"></script>
+  </head>
   <body>
     <h1>Register Page</h1>
-    <form method="post" action="register">
-      Enter Username:<br /><input type="text" name="username" /> <br />Enter
-      Password:<br /><input type="password" name="password" />
-      <br /><br /><input type="submit" value="Submit" />
+    <form>
+      Enter Username:<br /><input id="username" type="text" name="username" /> <br />Enter
+      Password:<br /><input id="password" type="password" name="password" />
+      <br /><br /><button onclick="onSubmit()" type="button">Submit</button>
     </form>
   </body>
 </html>

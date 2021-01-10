@@ -28,6 +28,17 @@ dotenv.config();
 
 var app = express();
 
+const absoultePathToCryptJd = join(__dirname, './../node_modules/crypto-js/crypto-js.js');
+// DEBUGGING:
+// console.log(absoultePathToCryptJd);
+app.use('/node_modules/crypto-js/crypto-js.js', express.static(absoultePathToCryptJd));
+
+const absolutePathToRegister = join(__dirname, './../public/register.js');
+app.use('/register.js', express.static(absolutePathToRegister));
+
+const absolutePathToPost = join(__dirname, './../public/post.js');
+app.use('/post.js', express.static(absolutePathToPost));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -54,25 +65,32 @@ const User = connection.model('User', UserSchema);
 
 // helpers
 const validPassword = (password: string, hash: string, salt: string) => {
+    // DEBUGGING:
+    console.log(JSON.stringify({
+        password,
+        hash,
+        salt
+    }, null, 4));
+
     const genHash = crypto.PBKDF2(password, salt).toString();
     return hash === genHash;
 };
 
-const genPassword = (password: string) => {
-    // https://github.com/jakubzapletal/crypto-js/blob/master/README.md
-    // https://security.stackexchange.com/questions/29951/salted-hashes-vs-hmac
-    const salt = crypto.lib.WordArray.random(16).toString();
-    const genHash = crypto.PBKDF2(password, salt).toString();
+// const genPassword = (password: string) => {
+//     // https://github.com/jakubzapletal/crypto-js/blob/master/README.md
+//     // https://security.stackexchange.com/questions/29951/salted-hashes-vs-hmac
+//     const salt = crypto.lib.WordArray.random(16).toString();
+//     const genHash = crypto.PBKDF2(password, salt).toString();
 
-    // DEBUGGING:
-    // console.log(salt);
-    // console.log(genHash);
+//     // DEBUGGING:
+//     // console.log(salt);
+//     // console.log(genHash);
 
-    return {
-      salt: salt,
-      hash: genHash
-    };
-};
+//     return {
+//       salt: salt,
+//       hash: genHash
+//     };
+// };
 
 const localStrategyHandler = new LocalStrategy(
     (username, password, cb) => {
@@ -162,15 +180,24 @@ app.get('/register', (req, res, next) => {
 });
 
 app.post('/register', (req, res, next) => {
-    
-    const saltHash = genPassword(req.body.password);
-    
-    const salt = saltHash.salt;
-    const hash = saltHash.hash;
+    const salt = req.body.salt;
+    const password = req.body.password;
+    const username = req.body.username;
+
+    // DEBUGGING:
+    console.log(JSON.stringify({
+        salt,
+        password,
+        username
+    }, null, 4));
+
+    // const saltHash = genPassword(req.body.password);    
+    // const salt = saltHash.salt;
+    // const hash = saltHash.hash;
 
     const newUser = new User({
-        username: req.body.username,
-        hash: hash,
+        username: username,
+        hash: password,
         salt: salt
     });
 
