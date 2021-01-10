@@ -3,7 +3,6 @@ type ExpressUser = Express.User;
 import mongoose from 'mongoose';
 import session from 'express-session';
 import passport from 'passport';
-import crypto from 'crypto-js';
 import passportLocal from 'passport-local';
 const LocalStrategy = passportLocal.Strategy;
 import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongoOptions, NativeMongoPromiseOptions }*/ from 'connect-mongo';
@@ -15,8 +14,6 @@ const relativePathToPublic = './../public';
 interface IUser {
     username: string;
     hash: string;
-    salt: string;
-    id?: string
 }
 
 // ?
@@ -57,14 +54,13 @@ const connection = mongoose.createConnection(conn, {
 
 const UserSchema = new mongoose.Schema({
     username: String,
-    hash: String,
-    salt: String
+    hash: String
 });
 
 const User = connection.model('User', UserSchema);
 
 // helpers
-const validPassword = (password: string, hash: string, salt: string) => {
+const validPassword = (passwordHash: string, hash: string) => {
     // DEBUGGING:
     // console.log(JSON.stringify({
     //     password,
@@ -72,8 +68,8 @@ const validPassword = (password: string, hash: string, salt: string) => {
     //     salt
     // }, null, 4));
 
-    const genHash = crypto.PBKDF2(password, salt).toString();
-    return hash === genHash;
+    // const genHash = crypto.SHA512(password).toString();
+    return hash === passwordHash;
 };
 
 // const genPassword = (password: string) => {
@@ -99,7 +95,7 @@ const localStrategyHandler = new LocalStrategy(
 
                 if (!user) { return cb(null, false) }
 
-                const isValid = validPassword(password, user.hash, user.salt);
+                const isValid = validPassword(password, user.hash);
 
                 if (isValid) {
                     return cb(null, user);
@@ -180,7 +176,6 @@ app.get('/register', (req, res, next) => {
 });
 
 app.post('/register', (req, res, next) => {
-    const salt = req.body.salt;
     const password = req.body.password;
     const username = req.body.username;
 
@@ -194,7 +189,6 @@ app.post('/register', (req, res, next) => {
     const newUser = new User({
         username: username,
         hash: password,
-        salt: salt
     });
 
     newUser.save()

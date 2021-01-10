@@ -5,7 +5,6 @@
  * @param {object} params the paramiters to add to the url
  * @param {string} [method=post] the method to use on the form
  */
-
 function post(path, params, method = 'post') {
 
     // The rest of this code assumes you are not using a library.
