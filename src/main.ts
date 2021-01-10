@@ -66,11 +66,11 @@ const User = connection.model('User', UserSchema);
 // helpers
 const validPassword = (password: string, hash: string, salt: string) => {
     // DEBUGGING:
-    console.log(JSON.stringify({
-        password,
-        hash,
-        salt
-    }, null, 4));
+    // console.log(JSON.stringify({
+    //     password,
+    //     hash,
+    //     salt
+    // }, null, 4));
 
     const genHash = crypto.PBKDF2(password, salt).toString();
     return hash === genHash;
@@ -185,15 +185,11 @@ app.post('/register', (req, res, next) => {
     const username = req.body.username;
 
     // DEBUGGING:
-    console.log(JSON.stringify({
-        salt,
-        password,
-        username
-    }, null, 4));
-
-    // const saltHash = genPassword(req.body.password);    
-    // const salt = saltHash.salt;
-    // const hash = saltHash.hash;
+    // console.log(JSON.stringify({
+    //     salt,
+    //     password,
+    //     username
+    // }, null, 4));
 
     const newUser = new User({
         username: username,
@@ -207,7 +203,6 @@ app.post('/register', (req, res, next) => {
         });
 
     res.redirect('/login');
-
 });
 
 /**
@@ -217,7 +212,6 @@ app.post('/register', (req, res, next) => {
  * Also, look up what behaviour express session has without a maxage set
  */
 app.get('/protected-route', (req, res, next) => {
-    
     // This is how you check if a user is authenticated and protect a route.  You could turn this into a custom middleware to make it less redundant
     if (req.isAuthenticated()) {
         res.send('<h1>You are authenticated</h1><p><a href="/logout">Logout and reload</a></p>');
