@@ -13,3 +13,5 @@ import dotenv from 'dotenv';
 // const { ensureAuthenticated } = require('connect-ensure-authenticated');
 // const { ensureScope } = require('connect-ensure-authorization');
 
+// cf. https://github.com/zachgoll/express-session-authentication-starter/tree/final-all-in-one
+dotenv.config();
