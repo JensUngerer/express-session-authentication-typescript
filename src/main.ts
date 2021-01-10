@@ -9,6 +9,8 @@ const LocalStrategy = passportLocal.Strategy;
 import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongoOptions, NativeMongoPromiseOptions }*/ from 'connect-mongo';
 const MongoStore = connectMongo(session);
 import dotenv from 'dotenv';
+import { join } from 'path';
+const relativePathToPublic = './../public';
 
 interface IUser {
     username: string;
@@ -133,21 +135,15 @@ app.use(passportInitializeHandler);
 const passportSessionHanlder = passport.session();
 app.use(passportSessionHanlder);
 
-// TEMPORARY!!!
 app.get('/', (req, res, next) => {
-    res.send('<h1>Home</h1><p>Please <a href="/register">register</a></p>');
+    const absolutePathToIndex = join(__dirname, relativePathToPublic, 'index.html');
+    res.sendFile(absolutePathToIndex);
 });
 
 // When you visit http://localhost:3000/login, you will see "Login Page"
 app.get('/login', (req, res, next) => {
-   
-    const form = '<h1>Login Page</h1><form method="POST" action="/login">\
-    Enter Username:<br><input type="text" name="username">\
-    <br>Enter Password:<br><input type="password" name="password">\
-    <br><br><input type="submit" value="Submit"></form>';
-
-    res.send(form);
-
+    const absolutePathToLogin = join(__dirname, relativePathToPublic, 'login.html');
+    res.sendFile(absolutePathToLogin);
 });
 
 // Since we are using the passport.authenticate() method, we should be redirected no matter what 
@@ -161,14 +157,8 @@ app.post('/login', (outerReq: Request, outerRes: Response, outerNext: NextFuncti
 
 // When you visit http://localhost:3000/register, you will see "Register Page"
 app.get('/register', (req, res, next) => {
-
-    const form = '<h1>Register Page</h1><form method="post" action="register">\
-                    Enter Username:<br><input type="text" name="username">\
-                    <br>Enter Password:<br><input type="password" name="password">\
-                    <br><br><input type="submit" value="Submit"></form>';
-
-    res.send(form);
-    
+    const absolutePathToRegister = join(__dirname, relativePathToPublic, 'register.html');
+    res.sendFile(absolutePathToRegister);    
 });
 
 app.post('/register', (req, res, next) => {
