@@ -42,11 +42,6 @@ const connection = mongoose.createConnection(conn, {
     useUnifiedTopology: true
 });
 
-
-connection.on('connecting', () => {
-    console.log('connected');
-});
-
 const UserSchema = new mongoose.Schema({
     username: String,
     hash: String,
