@@ -89,8 +89,8 @@ const localStrategyHandler = new LocalStrategy(
 passport.use(localStrategyHandler);
 
 const serializeUserHandler = (user: ExpressUser, done: (err: any, id?: any) => void) => {
-    console.log(JSON.stringify(user, null, 4));
-    done(null, (user as any).id);
+    // console.log(JSON.stringify(user, null, 4));
+    done(null, (user as any)._id);
 };
 passport.serializeUser(serializeUserHandler);
 
@@ -145,8 +145,12 @@ app.get('/login', (req, res, next) => {
 });
 
 // Since we are using the passport.authenticate() method, we should be redirected no matter what 
-app.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' }), (err: any, req: Request, res: Response, next: NextFunction) => {
-    if (err) next(err);
+app.post('/login', (outerReq: Request, outerRes: Response, outerNext: NextFunction) => {
+    // DEBUGGING: password is transmitted without encription!
+    // console.log(outerReq.body.password);
+
+    const handler = passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' });
+    return handler(outerReq, outerRes, outerNext);
 });
 
 // When you visit http://localhost:3000/register, you will see "Register Page"
@@ -216,8 +220,8 @@ app.get('/login-failure', (req, res, next) => {
 app.get('/login-status', (req, res) => {
     // https://stackoverflow.com/questions/18739725/how-to-know-if-user-is-logged-in-with-passport-js
     // req.user
-    console.log(req.isAuthenticated());
-    console.log(JSON.stringify(req.user));
+    // console.log(req.isAuthenticated());
+    // console.log(JSON.stringify(req.user));
     // console.log(passport.transformAuthInfo());
     req.isAuthenticated() ? res.status(200).send({ loggedIn: true }) : res.status(200).send({ loggedIn: false });
 });
