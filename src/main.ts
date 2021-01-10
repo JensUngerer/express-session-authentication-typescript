@@ -3,7 +3,7 @@ type ExpressUser = Express.User;
 import mongoose from 'mongoose';
 import session from 'express-session';
 import passport from 'passport';
-import crypto from 'crypto';
+import crypto from 'crypto-js';
 import passportLocal from 'passport-local';
 const LocalStrategy = passportLocal.Strategy;
 import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongoOptions, NativeMongoPromiseOptions }*/ from 'connect-mongo';
@@ -52,14 +52,20 @@ const User = connection.model('User', UserSchema);
 
 // helpers
 const validPassword = (password: string, hash: string, salt: string) => {
-    var hashVerify = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
-    return hash === hashVerify;
+    const genHash = crypto.PBKDF2(password, salt).toString();
+    return hash === genHash;
 };
 
 const genPassword = (password: string) => {
-    var salt = crypto.randomBytes(32).toString('hex');
-    var genHash = crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
-    
+    // https://github.com/jakubzapletal/crypto-js/blob/master/README.md
+    // https://security.stackexchange.com/questions/29951/salted-hashes-vs-hmac
+    const salt = crypto.lib.WordArray.random(16).toString();
+    const genHash = crypto.PBKDF2(password, salt).toString();
+
+    // DEBUGGING:
+    // console.log(salt);
+    // console.log(genHash);
+
     return {
       salt: salt,
       hash: genHash
