@@ -9,6 +9,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "start:hosting": "node ./dist/node-typescript-starter",
     "start:dev": "node --inspect ./dist/node-typescript-starter",
     "build:dev": "webpack --env.development",
     "start": "webpack --progress --env.development --env.nodemon",
