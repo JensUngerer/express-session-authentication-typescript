@@ -9,7 +9,8 @@ import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongo
 const MongoStore = connectMongo(session);
 import dotenv from 'dotenv';
 import { join } from 'path';
-import http from 'http';
+import https from 'https';
+import fs from 'fs';
 // @ts-ignore
 import { ensureAuthenticated } from 'connect-ensure-authenticated';
 
@@ -28,6 +29,30 @@ interface IUser {
 dotenv.config();
 
 // https://stackoverflow.com/questions/11744975/enabling-https-on-express-js
+const relativePathToCerts = './../certs';
+const keyFileName = 'selfsigned.key';
+
+const absolutePathToKey = join(__dirname, relativePathToCerts, keyFileName);
+// console.log(absolutePathToKey);
+
+const key: string = fs.readFileSync(absolutePathToKey).toString('utf8');
+// console.log(key);
+
+
+const selfSignedCertFileName = 'selfsigned.crt';
+const absolutePathToCert = join(__dirname, relativePathToCerts, selfSignedCertFileName);
+// console.log(absolutePathToCert);
+
+const cert: string = fs.readFileSync(absolutePathToCert).toString('utf8');
+// console.log(cert);
+
+const options: any = {
+  key: key,
+  cert: cert
+};
+
+
+
 var app = express();
 
 const absoultePathToCryptJd = join(__dirname, './../node_modules/crypto-js/crypto-js.js');
@@ -247,6 +272,7 @@ if (!process ||
 
 const port = parseInt(process.env.PORT);
 // app.listen(port);
-const server = http.createServer(app);
-server.listen(port);
-console.log('listening on port: ' + port);
+const server = https.createServer(options, app);
+server.listen(port, () => {
+    console.log('listening on port: ' + port);
+});
