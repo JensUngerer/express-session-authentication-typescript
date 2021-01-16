@@ -9,6 +9,7 @@ import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongo
 const MongoStore = connectMongo(session);
 import dotenv from 'dotenv';
 import { join } from 'path';
+import http from 'http';
 // @ts-ignore
 import { ensureAuthenticated } from 'connect-ensure-authenticated';
 
@@ -26,6 +27,7 @@ interface IUser {
 // cf. https://github.com/zachgoll/express-session-authentication-starter/tree/final-all-in-one
 dotenv.config();
 
+// https://stackoverflow.com/questions/11744975/enabling-https-on-express-js
 var app = express();
 
 const absoultePathToCryptJd = join(__dirname, './../node_modules/crypto-js/crypto-js.js');
@@ -244,5 +246,7 @@ if (!process ||
 }
 
 const port = parseInt(process.env.PORT);
-app.listen(port);
+// app.listen(port);
+const server = http.createServer(app);
+server.listen(port);
 console.log('listening on port: ' + port);
