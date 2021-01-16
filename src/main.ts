@@ -9,6 +9,9 @@ import connectMongo/*, { MongooseConnectionOptions, MongoUrlOptions, NativeMongo
 const MongoStore = connectMongo(session);
 import dotenv from 'dotenv';
 import { join } from 'path';
+// @ts-ignore
+import { ensureAuthenticated } from 'connect-ensure-authenticated';
+
 const relativePathToPublic = './../public';
 
 interface IUser {
@@ -30,11 +33,9 @@ const absoultePathToCryptJd = join(__dirname, './../node_modules/crypto-js/crypt
 // console.log(absoultePathToCryptJd);
 app.use('/node_modules/crypto-js/crypto-js.js', express.static(absoultePathToCryptJd));
 
-const absolutePathToRegister = join(__dirname, './../public/register.js');
-app.use('/register.js', express.static(absolutePathToRegister));
-
-const absolutePathToPost = join(__dirname, './../public/post.js');
-app.use('/post.js', express.static(absolutePathToPost));
+const absolutePathToPost = join(__dirname, './../public');
+const expressStatic = express.static(absolutePathToPost);
+app.use('/', expressStatic);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -149,6 +150,11 @@ app.use(passportInitializeHandler);
 const passportSessionHanlder = passport.session();
 app.use(passportSessionHanlder);
 
+// https://medium.com/javascript-in-plain-english/excluding-routes-from-calling-express-middleware-with-express-unless-3389ab4117ef
+app.use(ensureAuthenticated().unless({
+    path: ['/login', '/register', '/', '/logout']
+}));
+
 app.get('/', (req, res, next) => {
     const absolutePathToIndex = join(__dirname, relativePathToPublic, 'index.html');
     res.sendFile(absolutePathToIndex);
@@ -161,18 +167,12 @@ app.get('/login', (req, res, next) => {
 });
 
 // Since we are using the passport.authenticate() method, we should be redirected no matter what 
-app.post('/login', (outerReq: Request, outerRes: Response, outerNext: NextFunction) => {
-    // DEBUGGING: password is transmitted without encription!
-    // console.log(outerReq.body.password);
-
-    const handler = passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' });
-    return handler(outerReq, outerRes, outerNext);
-});
+app.post('/login', passport.authenticate('local', { failureRedirect: '/login-failure', successRedirect: 'login-success' }), (outerReq: Request, outerRes: Response, outerNext: NextFunction) => { });
 
 // When you visit http://localhost:3000/register, you will see "Register Page"
 app.get('/register', (req, res, next) => {
     const absolutePathToRegister = join(__dirname, relativePathToPublic, 'register.html');
-    res.sendFile(absolutePathToRegister);    
+    res.sendFile(absolutePathToRegister);
 });
 
 app.post('/register', (req, res, next) => {
